@@ -1,0 +1,43 @@
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Build binaries
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Bazel
+      uses: world-federation-of-advertisers/actions/setup-bazel@v2
+
+    - name: Build
+      run: >
+        bazel build
+        --compilation_mode opt
+        --config libc++
+        //binaries:gateway_main
+
+    - name: Create tarball
+      run: tar -c -f binaries-linux-amd64.tar.gz bazel-bin/binaries/emulator_main bazel-bin/binaries/gateway_main_/gateway_main
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-linux-amd64
+        path: binaries-linux-amd64.tar.gz
+        compression-level: 0
+
+    - name: Upload release asset
+      if: github.event_name == 'release'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: >-
+        gh release upload "$GITHUB_REF_NAME" binaries-linux-amd64.tar.gz
