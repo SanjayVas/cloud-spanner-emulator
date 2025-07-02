@@ -18,12 +18,36 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # The ubuntu-22.04 runner has clang-15 installed, but uses clang-14 by default.
+    # See https://github.com/actions/runner-images/blob/main/images/ubuntu/scripts/build/install-clang.sh
+    - name: Set up Clang
+      run: |
+        readonly version=15
+        readonly priority=50
+
+        sudo update-alternatives --remove-all clang++
+        sudo update-alternatives --remove-all clang
+
+        sudo apt remove clang-14
+        sudo apt install "clang-${version}" "lld-${version}" "libc++-${version}-dev" "libc++abi-${version}-dev"
+
+        sudo update-alternatives \
+          --verbose \
+          --install /usr/bin/clang  clang   "/usr/bin/clang-${version}" "${priority}" \
+          --slave /usr/bin/clang++  clang++ "/usr/bin/clang++-${version}" \
+          --slave /usr/bin/lld      lld     "/usr/bin/lld-${version}" \
+          --slave /usr/bin/ld.lld   ld.lld  "/usr/bin/ld.lld-${version}"
+        sudo update-alternatives \
+          --set                     clang   "/usr/bin/clang-${version}"
+
     - name: Set up Bazel
       uses: world-federation-of-advertisers/actions/setup-bazel@v2
 
     - name: Get Bazel cache params
       id: get-cache-params
       uses: world-federation-of-advertisers/actions/bazel-get-cache-params@v2
+      with:
+        cache-version: 1
 
     - name: Restore Bazel cache
       uses: actions/cache/restore@v4
