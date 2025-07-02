@@ -140,8 +140,8 @@ go_repository(
     build_file_proto_mode = "disable_global",
     importpath = "google.golang.org/grpc",
     repo_mapping = {"@go_googleapis": "@com_google_googleapis"},
-    sum = "h1:LKtvyfbX3UGVPFcGqJ9ItpVWW6oN/2XqTxfAnwRRXiA=",
-    version = "v1.64.1",
+    sum = "h1:toSN4j5/Xju+HVovfaY5g1YZVuJeHzQZhP8eJ0L0f1I=",
+    version = "v1.65.1",
 )
 
 go_repository(
@@ -295,9 +295,9 @@ http_archive(
     # - Adding implicit conversion between grpc::Status and absl::Status
     patch_args = ["-p1"],
     patches = ["//build/bazel:grpc.patch"],
-    sha256 = "c682fc39baefc6e804d735e6b48141157b7213602cc66dbe0bf375b904d8b5f9",
-    strip_prefix = "grpc-1.64.2",
-    urls = ["https://github.com/grpc/grpc/archive/refs/tags/v1.64.2.tar.gz"],
+    sha256 = "bdab9cb52e3ee703d6c09d15716bcc10a150b2e9e414182e5b375d32050dba84",
+    strip_prefix = "grpc-1.65.5",
+    urls = ["https://github.com/grpc/grpc/archive/refs/tags/v1.65.5.tar.gz"],
 )
 
 http_archive(
@@ -352,9 +352,9 @@ http_archive(
 # gRPC Java
 http_archive(
     name = "io_grpc_grpc_java",
-    sha256 = "301e0de87c7659cc790bd2a7265970a71632d55773128c98768385091c0a1a97",
-    strip_prefix = "grpc-java-1.61.0",
-    url = "https://github.com/grpc/grpc-java/archive/v1.61.0.zip",
+    sha256 = "109c9f05068d8e01e4d371cb704d47515b0ececd12867dc065d774fadc328bfb",
+    strip_prefix = "grpc-java-1.65.1",
+    url = "https://github.com/grpc/grpc-java/archive/v1.65.1.zip",
 )
 
 load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
