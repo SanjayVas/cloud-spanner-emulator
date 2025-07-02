@@ -1,6 +1,13 @@
 build --cxxopt=-std=c++17
 build --host_cxxopt=-std=c++17
 
+# Clang with libc++.
+build:libc++ --repo_env='CC=clang'
+build:libc++ --cxxopt=-stdlib=libc++
+build:libc++ --linkopt=-stdlib=libc++
+build:libc++ --linkopt=-lc++
+build:libc++ --linkopt=-lc++abi
+
 # gRPC has some issues with building under bazel on MacOS with thread-locals.
 # See https://github.com/bazelbuild/bazel/issues/4341 for more details. This
 # flag enabled gRPC workarounds for building under bazel.
