@@ -1,32 +1,34 @@
 diff --git a/BUILD b/BUILD
-index 8e036bbc85..76dc6a641c 100644
+index d667123b24..81009b48e0 100644
 --- a/BUILD
 +++ b/BUILD
-@@ -581,6 +581,7 @@ grpc_cc_library(
-     defines = ["GRPC_NO_XDS"],
-     external_deps = [
-         "absl/base:core_headers",
-+        "absl/status",
+@@ -4823,6 +4823,9 @@ grpc_cc_library(
+         "grpc++_public_hdrs",
+         "grpc_public_hdrs",
      ],
-     language = "c++",
-     public_hdrs = GRPC_PUBLIC_HDRS,
++    external_deps = [
++        "absl/status"
++    ],
+ )
+ 
+ grpc_cc_library(
 diff --git a/bazel/grpc_extra_deps.bzl b/bazel/grpc_extra_deps.bzl
-index a370fe4496..f79e9852a5 100644
+index a370fe4496..106a16ec65 100644
 --- a/bazel/grpc_extra_deps.bzl
 +++ b/bazel/grpc_extra_deps.bzl
-@@ -51,9 +51,6 @@ def grpc_extra_deps(ignore_version_differences = False):
+@@ -51,10 +51,6 @@ def grpc_extra_deps(ignore_version_differences = False):
  
      api_dependencies()
  
 -    go_rules_dependencies()
 -    go_register_toolchains(version = "1.20")
 -    gazelle_dependencies()
- 
+-
      # Pull-in the go 3rd party dependencies for protoc_gen_validate, which is
      # needed for building C++ xDS protos
-
+     go_third_party()
 diff --git a/include/grpcpp/impl/status.h b/include/grpcpp/impl/status.h
-index 94c0e80a9b..266e67ccd2 100644
+index 94c0e80a9b..755a136e24 100644
 --- a/include/grpcpp/impl/status.h
 +++ b/include/grpcpp/impl/status.h
 @@ -21,6 +21,7 @@
@@ -37,15 +39,14 @@ index 94c0e80a9b..266e67ccd2 100644
  #include <grpc/status.h>
  #include <grpc/support/port_platform.h>
  #include <grpcpp/support/config.h>
-@@ -98,6 +99,10 @@ class GRPC_MUST_USE_RESULT_WHEN_USE_STRICT_WARNING GRPCXX_DLL Status {
-   Status(StatusCode code, const std::string& error_message)
-       : code_(code), error_message_(error_message) {}
+@@ -107,6 +108,10 @@ class GRPC_MUST_USE_RESULT_WHEN_USE_STRICT_WARNING GRPCXX_DLL Status {
+         error_message_(error_message),
+         binary_error_details_(error_details) {}
  
 +  operator absl::Status() const& {
 +    return absl::Status(static_cast<absl::StatusCode>(code_), error_message_);
 +  }
 +
-   /// Construct an instance with \a code,  \a error_message and
-   /// \a error_details. It is an error to construct an OK status with non-empty
-   /// \a error_message and/or \a error_details.
- 
+   // Pre-defined special status objects.
+   /// An OK pre-defined instance.
+   static const Status& OK;
