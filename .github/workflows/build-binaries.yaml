@@ -71,19 +71,30 @@ jobs:
         path: ${{ steps.get-cache-params.outputs.cache-path }}
         key: ${{ steps.get-cache-params.outputs.cache-key }}
 
-    - name: Create tarball
-      run: tar -c -f binaries-linux-amd64.tar.gz bazel-bin/binaries/emulator_main bazel-bin/binaries/gateway_main_/gateway_main
+    - name: Copy binaries
+      id: copy-binaries
+      run: |
+        readonly bin_path="$RUNNER_TEMP/binaries"
+        mkdir -p "${bin_path}"
+        cp bazel-bin/binaries/emulator_main "${bin_path}/"
+        cp bazel-bin/binaries/gateway_main_/gateway_main "${bin_path}/"
+
+        echo "path=${bin_path}" >> "$GITHUB_OUTPUT"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: binaries-linux-amd64
-        path: binaries-linux-amd64.tar.gz
+        path: ${{ steps.copy-binaries.outputs.path }}
         compression-level: 0
 
     - name: Upload release asset
       if: github.event_name == 'release'
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: >-
-        gh release upload "$GITHUB_REF_NAME" binaries-linux-amd64.tar.gz
+        BIN_PATH: ${{ steps.copy-binaries.outputs.path }}
+      run: |
+        cd "$BIN_PATH"
+        readonly archive_path="$RUNNER_TEMP/binaries-linux-amd64.tar.gz"
+        tar -c -f "${archive_path}" *
+        gh release upload "$GITHUB_REF_NAME" "${archive_path}"
